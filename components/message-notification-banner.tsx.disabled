@@ -1,0 +1,75 @@
+"use client"
+
+import { useState, useEffect } from 'react'
+import { Alert } from './ui/alert'
+
+interface MessageNotificationBannerProps {
+  message: string
+  sender: string
+  onDismiss: () => void
+  autoDismiss?: boolean
+  autoDismissTimeout?: number
+}
+
+export function MessageNotificationBanner({
+  message,
+  sender,
+  onDismiss,
+  autoDismiss = true,
+  autoDismissTimeout = 5000,
+}: MessageNotificationBannerProps) {
+  const [isVisible, setIsVisible] = useState(true)
+
+  useEffect(() => {
+    if (autoDismiss) {
+      const timer = setTimeout(() => {
+        setIsVisible(false)
+        onDismiss()
+      }, autoDismissTimeout)
+
+      return () => clearTimeout(timer)
+    }
+  }, [autoDismiss, autoDismissTimeout, onDismiss])
+
+  if (!isVisible) return null
+
+  return (
+    <div className="fixed top-4 right-4 z-50 max-w-sm animate-in slide-in-from-top-2">
+      <Alert className="bg-background border shadow-lg">
+        <div className="flex justify-between items-start gap-2">
+          <div>
+            <p className="font-medium">{sender}</p>
+            <p className="text-sm text-muted-foreground">{message}</p>
+          </div>
+          <button
+            onClick={() => {
+              setIsVisible(false)
+              onDismiss()
+            }}
+            className="text-muted-foreground hover:text-foreground"
+          >
+            <CloseIcon className="h-4 w-4" />
+          </button>
+        </div>
+      </Alert>
+    </div>
+  )
+}
+
+function CloseIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  )
+}

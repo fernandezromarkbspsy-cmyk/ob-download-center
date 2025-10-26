@@ -1,0 +1,219 @@
+"use client"
+
+import { createContext, useContext } from 'react'
+
+const ChatContext = createContext<any>(undefined)
+
+export function ChatProvider({ children }: { children: React.ReactNode }) {
+  // Chat functionality temporarily disabled
+  const value = {
+    conversations: [],
+    activeConversation: null,
+    notifications: [],
+    isLoading: false,
+    error: null,
+    setActiveConversation: () => {},
+    sendMessage: () => {},
+    createOrSelectConversation: () => {},
+    markAsRead: () => {},
+    dismissNotification: () => {}
+  }
+
+  return (
+    <ChatContext.Provider value={value}>
+      {children}
+    </ChatContext.Provider>
+  )
+}
+
+export function useChat() {
+  const context = useContext(ChatContext)
+  if (context === undefined) {
+    throw new Error('useChat must be used within a ChatProvider')
+  }
+  return context
+}
+
+const ChatContext = createContext<ChatContextType | undefined>(undefined)
+
+export function ChatProvider({ children }: { children: React.ReactNode }) {
+  // Temporarily disabled - return empty data and no-op functions
+  const conversations: Conversation[] = []
+  const activeConversation = null
+  const notifications: Notification[] = []
+  const isLoading = false
+  const error = null
+
+  // No-op functions
+  const setActiveConversation = (_: Conversation) => {}
+  const sendMessage = (_: string) => {}
+  const createOrSelectConversation = (_: string) => {}
+  const markAsRead = (_: string) => {}
+  const dismissNotification = (_: { message: string; sender: string }) => {}
+
+  // Mock data loading - replace with actual API calls
+  useEffect(() => {
+    const loadConversations = async () => {
+      try {
+        // Simulated API call
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        setConversations([
+          {
+            id: '1',
+            participantId: 'John',
+            messages: [
+              {
+                id: '1',
+                senderId: 'John',
+                content: 'Hello there!',
+                timestamp: new Date(),
+                read: false
+              }
+            ],
+            unreadCount: 1,
+            lastMessage: {
+              id: '1',
+              senderId: 'John',
+              content: 'Hello there!',
+              timestamp: new Date(),
+              read: false
+            }
+          },
+          {
+            id: '2',
+            participantId: 'Alice',
+            messages: [
+              {
+                id: '2',
+                senderId: 'currentUser',
+                content: 'Hi Alice!',
+                timestamp: new Date(),
+                read: true
+              }
+            ],
+            unreadCount: 0,
+            lastMessage: {
+              id: '2',
+              senderId: 'currentUser',
+              content: 'Hi Alice!',
+              timestamp: new Date(),
+              read: true
+            }
+          }
+        ])
+        setIsLoading(false)
+      } catch (err) {
+        setError(err instanceof Error ? err : new Error('Failed to load conversations'))
+        setIsLoading(false)
+      }
+    }
+    loadConversations()
+  }, [])
+
+  const sendMessage = (content: string) => {
+    if (!activeConversation) return
+
+    const newMessage: Message = {
+      id: Math.random().toString(),
+      senderId: 'currentUser', // Replace with actual user ID
+      content,
+      timestamp: new Date(),
+      read: false
+    }
+
+    setConversations(prev => prev.map(conv => {
+      if (conv.id === activeConversation.id) {
+        return {
+          ...conv,
+          messages: [...conv.messages, newMessage],
+          lastMessage: newMessage
+        }
+      }
+      return conv
+    }))
+  }
+
+  const createOrSelectConversation = (userId: string) => {
+    const existing = conversations.find(c => c.participantId === userId)
+    if (existing) {
+      setActiveConversation(existing)
+      return
+    }
+
+    const newConversation: Conversation = {
+      id: Math.random().toString(),
+      participantId: userId,
+      messages: [],
+      unreadCount: 0
+    }
+
+    setConversations(prev => [...prev, newConversation])
+    setActiveConversation(newConversation)
+  }
+
+  const markAsRead = (conversationId: string) => {
+    setConversations(prev => prev.map(conv => {
+      if (conv.id === conversationId) {
+        return {
+          ...conv,
+          unreadCount: 0,
+          messages: conv.messages.map(msg => ({ ...msg, read: true }))
+        }
+      }
+      return conv
+    }))
+  }
+
+  const dismissNotification = (notification: { message: string; sender: string }) => {
+    setNotifications(prev => prev.filter(n => 
+      !(n.message === notification.message && n.sender === notification.sender)
+    ))
+  }
+
+  // Add notification when a new message is received (in a real app, this would be triggered by a WebSocket or similar)
+  useEffect(() => {
+    conversations.forEach(conv => {
+      const lastMsg = conv.messages[conv.messages.length - 1]
+      if (lastMsg && !lastMsg.read && lastMsg.senderId !== 'currentUser') {
+        // Check if notification already exists
+        const notificationExists = notifications.some(n => 
+          n.message === lastMsg.content && n.sender === conv.participantId
+        )
+
+        if (!notificationExists) {
+          setNotifications(prev => [...prev, {
+            id: Math.random().toString(),
+            message: lastMsg.content,
+            sender: conv.participantId,
+            timestamp: lastMsg.timestamp
+          }])
+        }
+      }
+    })
+  }, [conversations, notifications])
+
+  return (
+    <ChatContext.Provider value={{
+      conversations,
+      activeConversation,
+      notifications,
+      isLoading,
+      error,
+      setActiveConversation,
+      sendMessage,
+      createOrSelectConversation,
+      markAsRead,
+      dismissNotification
+    }}>
+      {children}
+    </ChatContext.Provider>
+  )
+}
+
+export function useChat() {
+  const context = useContext(ChatContext)
+  if (context === undefined) {
+    throw new Error('useChat must be used within a ChatProvider')
+  }
+  return context
+}

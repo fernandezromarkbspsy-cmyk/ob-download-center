@@ -1,0 +1,126 @@
+"use client"
+
+import { useState } from 'react'
+import { UserSelection } from './user-selection'
+import { ConversationList } from './conversation-list'
+import { MessageView } from './message-view'
+import { useChat } from '@/lib/chat-context'
+
+interface ChatPopupProps {
+  onClose: () => void
+}
+
+export function ChatPopup({ onClose }: ChatPopupProps) {
+  const [view, setView] = useState<'conversations' | 'messages' | 'newChat'>('conversations')
+  const { activeConversation } = useChat()
+
+  const handleBackToList = () => {
+    setView('conversations')
+  }
+
+  const handleSelectConversation = () => {
+    setView('messages')
+  }
+
+  const handleNewChat = () => {
+    setView('newChat')
+  }
+
+  return (
+    <div className="fixed bottom-4 right-4 w-[400px] h-[600px] bg-background border rounded-lg shadow-lg flex flex-col overflow-hidden">
+      <div className="flex items-center justify-between p-4 border-b">
+        <h2 className="text-lg font-semibold">
+          {view === 'messages' && activeConversation ? 'Chat' : 
+           view === 'newChat' ? 'New Message' : 'Messages'}
+        </h2>
+        <div className="flex items-center gap-2">
+          {view !== 'conversations' && (
+            <button
+              onClick={handleBackToList}
+              className="p-2 hover:bg-accent rounded-full"
+            >
+              <BackIcon className="h-5 w-5" />
+            </button>
+          )}
+          {view === 'conversations' && (
+            <button
+              onClick={handleNewChat}
+              className="p-2 hover:bg-accent rounded-full"
+            >
+              <NewChatIcon className="h-5 w-5" />
+            </button>
+          )}
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-accent rounded-full"
+          >
+            <CloseIcon className="h-5 w-5" />
+          </button>
+        </div>
+      </div>
+
+      {view === 'conversations' && (
+        <ConversationList onSelectConversation={handleSelectConversation} />
+      )}
+      {view === 'messages' && activeConversation && (
+        <MessageView conversation={activeConversation} />
+      )}
+      {view === 'newChat' && (
+        <UserSelection onUserSelect={() => setView('messages')} />
+      )}
+    </div>
+  )
+}
+
+function BackIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
+      <polyline points="15 18 9 12 15 6" />
+    </svg>
+  )
+}
+
+function NewChatIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
+      <line x1="12" y1="5" x2="12" y2="19" />
+      <line x1="5" y1="12" x2="19" y2="12" />
+    </svg>
+  )
+}
+
+function CloseIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  )
+}
