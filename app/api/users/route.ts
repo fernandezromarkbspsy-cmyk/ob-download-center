@@ -1,5 +1,4 @@
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs"
-import { cookies } from "next/headers"
+import { createClient } from "@/lib/supabase/server"
 import { NextResponse } from "next/server"
 
 export const dynamic = "force-dynamic"
@@ -10,26 +9,11 @@ export const dynamic = "force-dynamic"
  * a list of live users in the chat system.
  */
 export async function GET() {
-  const cookieStore = cookies()
-  const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
+  const supabase = await createClient()
 
   try {
-    // It's good practice to check for an active session,
-    // ensuring only authenticated users can fetch the user list.
-    const {
-      data: { session },
-    } = await supabase.auth.getSession()
-
-    if (!session) {
-      return new NextResponse(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { "Content-Type": "application/json" },
-      })
-    }
-
-    // Fetch all profiles. The 'user_profiles' table is a common convention
-    // for storing public user data alongside Supabase's 'auth.users' table.
-    const { data: users, error } = await supabase.from("user_profiles").select("*")
+    // Fetch all employees from the employees table
+    const { data: users, error } = await supabase.from("employees").select("*")
 
     if (error) throw error
 

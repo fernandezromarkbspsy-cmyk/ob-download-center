@@ -32,7 +32,7 @@ export default function DashboardTabs({
             <button
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
-              className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors transform-gpu duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-primary/50 ${
+              className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors transform-gpu duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-primary/50 ${
                 activeTab === tab.id
                   ? "bg-primary/5 text-foreground border border-border"
                   : "text-muted-foreground hover:bg-muted/5"
